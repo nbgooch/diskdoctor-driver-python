@@ -1,0 +1,1 @@
+GPS_ADDRESS = 0x42
