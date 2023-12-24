@@ -1,5 +1,9 @@
-import config.lsm6dsl as config
+import sys
 from smbus2 import SMBus
+
+sys.path.append("..")
+
+from config import lsm6dsl as config
 
 
 class Accelerometer:
