@@ -4,7 +4,7 @@ import signal
 import time
 import devices
 import socket
-import socketIOclient
+import socketio
 
 read = 0.2
 
@@ -15,30 +15,32 @@ if __name__ == "__main__":
   gyro = devices.gyroscope.Gryoscope()
   magneto = devices.magnetometer.Magnetometer()
   # Create a socket object
-  sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  # sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
   # Connect the socket to the server
-  sock.connect(('localhost', 5000))
+  # sock.connect(('192.168.1.2', 5000))
 
   # Create a Socket.IO client
-  sio = socketIOclient.SocketIO(sock)
+  sio = socketio.SimpleClient()
 
   # Connect to the Socket.IO server
-  sio.connect()
+  sio.connect('http://192.168.1.2:5000')
 
   # Listen for events from the server
-  sio.on('server', on_event)
+  event = sio.receive()
+  print(f'received event: "{event[0]}" with arguments {event[1:]}')
 
-  # Send an event to the server
-
-  # Close the socket
-  sock.close()
   while True:
-    data = gps.read_gps()
-    sio.emit('client', data)
+    sio.emit('gps_read', gps.read_gps())
+    data = accel.read_xyz()
+    sio.emit('accel_read', accel.read_xyz())
+    data = gyro.read_xyz()
+    sio.emit('gyro_read', gyro.read_xyz())
+    data = magneto.read_xyz()
+    sio.emit('magneto_read', magneto.read_xyz())
     time.sleep(read)
 
-#This will capture exit when using Ctrl-C
+#This will capture exit when using Ctrl-Cdoogonmg
 signal.signal(signal.SIGINT, handle_ctrl_c)
 def handle_ctrl_c(signal, frame):
   sys.exit(130)
